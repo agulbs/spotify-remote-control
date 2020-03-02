@@ -1,5 +1,5 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="utf-8">
@@ -11,154 +11,69 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://kit.fontawesome.com/87166af251.js" crossorigin="anonymous"></script>
+
+    <script>
+        $('#iconified').on('keyup', function() {
+            var input = $(this);
+            if (input.val().length === 0) {
+                input.addClass('empty');
+            } else {
+                input.removeClass('empty');
+            }
+        });
+    </script>
+
+
+    <style>
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        body {
+            background-color: #1f1f1f;
+        }
+
+        .search.empty {
+            font-family: FontAwesome;
+            font-style: normal;
+            font-weight: normal;
+            text-decoration: inherit;
+        }
+
+        .fontAwesome {
+            font-family: Helvetica, 'FontAwesome', sans-serif;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12 d-flex justify-content-center align-items-center" style="font-size:40px;height:75px;background-color:#93c2e6;">Lookup Song/Artist </div>
+    {%include '/search.html'%}
+    <!-- {%include '/searchResult.html'%} -->
+
+    <div class="container-fluid footer">
+        <div class="row align-items-center" style="background-color:#3b3b3b;height:80px;color:#ededed;">
+            <div class="col-3">
+                <img src="./static/square.png" class="img-fluid" alt="Responsive image">
+            </div>
+            <div class="col-9">
+                song name - artist
+                <div class="row" style="padding-top:5px;">
+                    <div class="col-4"><i class="fas fa-volume-down"></i></div>
+                    <div class="col-4"><i class="fas fa-play"></i></div>
+                    <div class="col-4"><i class="fas fa-volume-up"></i></div>
+                </div>
+            </div>
         </div>
-        {%include '/search.html'%}
-        {%include '/searches.html'%}
-        {%include '/controls.html'%}
+        <div class="row align-items-center" style="background-color:#3b3b3b;height:50px;color:#ad8989;border-top:solid 1px #1f1f1f;">
+            <div class="col-6 d-flex justify-content-center align-items-start" style="margin-bottom:10px;margin-top:10px"><i class=" fas fa-search"></i></div>
+            <div class="col-6 d-flex justify-content-center align-items-start" style="margin-bottom:10px;margin-top:10px"><i class=" fas fa-music"></i></div>
+        </div>
     </div>
-    {%include '/devices.html'%}
+
 </body>
 
-<script>
-    $(document).ready(function() {
-        var params = {}
-        $('#searchSubmit').click(function() {
-            var song = document.getElementById('search').value;
-            request(song)
-        });
-
-        function request(song) {
-            $.ajax({
-                url: '/song',
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({
-                    key: song
-                }),
-                success: (res) => {
-                    console.log(200)
-                    setSongs(res['songs'])
-                },
-                error: (err) => {
-                    console.log(err);
-                }
-            });
-        }
-    });
-
-    function playSong(song) {
-        $.ajax({
-            url: '/new-song',
-            type: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({
-                key: song
-            }),
-            success: (res) => {
-                console.log(200)
-            },
-            error: (err) => {
-                console.log(err);
-            }
-        });
-    }
-
-    function controlls(code) {
-        $.ajax({
-            url: '/music-controls',
-            type: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({
-                key: code
-            }),
-            success: (res) => {
-                if (code == "allDevices") {
-                    setDevices(res['devices'])
-                }
-            },
-            error: (err) => {
-                console.log(err);
-            }
-        });
-    }
-
-    function switchDevice(device) {
-        $.ajax({
-            url: '/switch-device',
-            type: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({
-                key: device
-            }),
-            success: (res) => {
-                console.log(200)
-            },
-            error: (err) => {
-                console.log(err);
-            }
-        });
-    }
-
-
-    function setSongs(songs) {
-        $('#songData').empty();
-        songs.forEach(song => {
-            $('#songData').append(
-                "<div class=\"row\" style=\"margin-top:7px;margin-bottom:7px;\">" +
-                "<div class=\"col-10\">" +
-                "<div class=\"row\">" +
-                "<div class=\"col-12\">" + song.name + "</div>" +
-                "<div class=\"col-12\">" + song.artist + "</div>" +
-                "<div class=\"col-12\">" + msConversion(song.duration) + "</div>" +
-                "</div>" +
-                "</div>" +
-                "<div class=\"col-2 align-items-ceter justify-content-center d-flex\">" +
-                "<button class=\"btn btn-success\" type=\"submit\" onclick=\"playSong(\'" + song.uri + "\')\">Play</button>" +
-                "</div>" +
-                "</div>"
-            );
-        })
-    }
-
-    function setDevices(devices) {
-        $('#deviceData').empty();
-
-        devices.forEach(device => {
-            $('#deviceData').append(
-                "<div class=\"row\" style=\"margin-bottom:25px;\">" +
-                "<div class=\"col-12\">Name: " + device.name + "</div>" +
-                "<div class = \"col-12\">Type: " + device.type + "</div>" +
-                "<div class = \"col-12\">Active: " + device.is_active + " </div>" +
-                "<div class = \"col-12 d-flex justify-content-center \">" +
-                "<button class = \"btn btn-primary\" data-dismiss=\"modal\" style=\"width:100%;\" onClick=\"switchDevice(\'" + device.id + "\')\">Select</button> </div > </div > "
-            )
-        })
-    }
-
-    function msConversion(millis) {
-        let sec = Math.floor(millis / 1000);
-        let hrs = Math.floor(sec / 3600);
-        sec -= hrs * 3600;
-        let min = Math.floor(sec / 60);
-        sec -= min * 60;
-
-        sec = '' + sec;
-        sec = ('00' + sec).substring(sec.length);
-
-        if (hrs > 0) {
-            min = '' + min;
-            min = ('00' + min).substring(min.length);
-            return hrs + ":" + min + ":" + sec;
-        } else {
-            return min + ":" + sec;
-        }
-    }
-</script>
 
 </html>
