@@ -83,6 +83,17 @@ def index():
 
     return render_template("index.html")
 
+@app.route("/library")
+def library():
+    return render_template("library.html")
+
+@app.route("/playlists", methods=["GET"])
+def playlists():
+    search = Search(sp)
+    playlists = search.user_playlists()
+    return jsonify({'playlists': playlists, 'status': "200"})
+
+
 @app.route("/current-playback", methods=["GET"])
 def current_playback():
     search = Search(sp)

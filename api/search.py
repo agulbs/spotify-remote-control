@@ -1,6 +1,7 @@
 from pprint import pprint
 from .songs import Songs
 
+
 class Search:
     def __init__(self, controller):
         self.controller = controller
@@ -19,12 +20,16 @@ class Search:
 
         return songs
 
-    def playlist(self, playlist):
-        results = self.controller.search(q=playlist, type='playlist')
-        # songs = self.format_songs(results)
+    def liked_songs(self):
+        results = self.controller.current_user_saved_tracks()
+        liked_songs = self.liked_songs_dict(results)
+        pprint(liked_songs)
 
-        return "working on it"
-        # return songs
+    def user_playlists(self):
+        results = self.controller.current_user_playlists()
+        pprint(results)
+        playlists = self.playlists_dict(results)
+        return playlists
 
     def format_songs(self, result):
         songs = []
@@ -52,7 +57,7 @@ class Search:
                 'duration': song['duration_ms'],
                 'popularity': song['popularity'],
                 'release_date': song['album']['release_date'],
-                'image':song['album']['images'][0]['url']
+                'image': song['album']['images'][0]['url']
             })
 
         return songs
@@ -65,9 +70,43 @@ class Search:
             'duration': result['item']['duration_ms'],
             'popularity': result['item']['popularity'],
             'release_date': result['item']['album']['release_date'],
-            'image':result['item']['album']['images'][0]['url']
+            'image': result['item']['album']['images'][0]['url']
         }
 
+    def playlists_dict(self, result):
+        playlists = []
+        pprint(result)
+        for playlist in result['items']:
+            playlists.append({
+                'name': playlist['name'],
+                'image': playlist['images'][0]['url'],
+                'tracks': playlist['href'],
+                'total': playlist['tracks']['total'],
+                'description': playlist['description']
+            })
+
+        return playlists
+
+    def liked_songs_dict(self, result):
+        all_songs = []
+        songs = result['items']
+
+        while result['next']:
+            result = self.controller.next(result)
+            songs.extend(result['items'])
+
+        for song in songs:
+            all_songs.append({
+                'artist': song['track']['album']['artists'][0]['name'],
+                'name': song['track']['album']['name'],
+                'uri': song['track']['uri'],
+                'duration': song['track']['duration_ms'],
+                'popularity': song['track']['popularity'],
+                'release_date': song['track']['album']['release_date'],
+                'image': song['track']['album']['images'][0]['url']
+            })
+
+        return all_songs
 
 
 # def format_songs(self, result):

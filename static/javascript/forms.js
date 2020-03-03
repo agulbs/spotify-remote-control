@@ -1,18 +1,6 @@
-var returnData;
-
-
-$('#iconified').on('keyup', function() {
-    var input = $(this);
-    if (input.val().length === 0) {
-        input.addClass('empty');
-    } else {
-        input.removeClass('empty');
-    }
-});
-
-
 $(document).ready(() => {
 
+    // Get current song queue
     var params = {
         'url': '/current-playback',
         'type': 'GET',
@@ -26,7 +14,18 @@ $(document).ready(() => {
         console.log(err)
     })
 
+    // hide search icon when chars in input
+    $('#iconified').on('keyup', function() {
+        var input = $(this);
+        if (input.val().length === 0) {
+            input.addClass('empty');
+        } else {
+            input.removeClass('empty');
+        }
+    });
 
+
+    // execute a search for song/artist
     $('#search').on('keypress', (e) => {
         if (e.which === 13) {
             params = {
@@ -37,6 +36,7 @@ $(document).ready(() => {
                 }
             }
 
+            // write data to view
             requestData(params).then((res) => {
                 $('#searchResultData').empty();
                 var cnt = 1;
@@ -63,6 +63,7 @@ $(document).ready(() => {
         }
     })
 
+    // play/pause music when icon pressed
     $('#playPause').on('click', (e) => {
         var value = e.target.classList[1].split('-')[1];
         params = {
@@ -73,6 +74,7 @@ $(document).ready(() => {
             }
         }
 
+        // swap icons accordingly
         requestData(params).then((res) => {
             if (value === "play")
                 e.target.classList.value = "fas fa-pause"
@@ -83,9 +85,51 @@ $(document).ready(() => {
         })
 
     })
+
+    // hide/display search view
+    $('#searchIcon').on('click', (e) => {
+        $('#searchContent').css('display', '')
+        $('#libraryContent').css('display', 'none')
+    })
+
+    // hide/display library view
+    $('#libraryIcon').on('click', (e) => {
+        $('#libraryContent').css('display', '')
+        $('#searchContent').css('display', 'none')
+    })
 })
 
+function getPlaylists() {
+    var params = {
+        'url': '/playlists',
+        'type': 'GET',
+        'data': {}
+    }
 
+    requestData(params).then((res) => {
+        console.log(res);
+        res['playlists'].forEach((playlist) => {
+            $('#playlistData').append(
+                "<div class=\"row\" style=\"padding-top:5px;padding-bottom:15px;\">" +
+                "<div class=\"col-3\">" +
+                "<img src=\"" + playlist.image + "\" class=\"img-fluid\" alt=\"Responsive image\">" +
+                "</div>" +
+                "<div class=\"col-9\">" +
+                "<div class=\"row\">" +
+                "<div class=\"col-12\">" + playlist.name + "</div>" +
+                "<div class=\"col-12\">" + playlist.total + "</div>" +
+                "</div>" +
+                "</div>" +
+                "</div>"
+            )
+        })
+    }, (err) => {
+        console.log(err)
+    })
+}
+
+
+// play chosen song & set in status bar
 function playSong(songUri, image, id) {
     params = {
         'url': '/new-song',
@@ -96,13 +140,17 @@ function playSong(songUri, image, id) {
     }
 
     requestData(params).then((res) => {
+        // disable all selected songs
         $('#searchResultData').children().each((idx, item) => {
             $('#name' + (idx + 1)).css('color', '#ededed')
         });
 
+        // highlight selected song
         $('#name' + id).css('color', 'green')
 
         var songName = $('#name' + id)[0].innerText;
+
+        // set current song in status
         setCurrSong(songName, image)
     }, (err) => {
         alert('No Device Selected')
@@ -111,6 +159,7 @@ function playSong(songUri, image, id) {
 }
 
 
+// set current song in status
 function setCurrSong(songName, image) {
     $('#currSongName')[0].innerText = songName
     $("#currSongImage").attr("src", image);
@@ -118,6 +167,7 @@ function setCurrSong(songName, image) {
 }
 
 
+// conver miliseconds to HH:MM:SS
 function msConversion(millis) {
     let sec = Math.floor(millis / 1000);
     let hrs = Math.floor(sec / 3600);
@@ -138,11 +188,13 @@ function msConversion(millis) {
 }
 
 
+// implement async await
 async function requestData(params) {
     return await request(params);
 }
 
 
+// execute http request
 function request(params) {
     return $.ajax({
         url: params['url'],
