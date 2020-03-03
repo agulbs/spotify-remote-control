@@ -8,6 +8,7 @@ class Search:
     def song(self, song):
         results = self.controller.search(q=song, limit=50) #, type='track')
         songs = self.songs_dict(results)
+        pprint(songs)
 
         return songs
 
@@ -45,6 +46,7 @@ class Search:
                 'duration': song['duration_ms'],
                 'popularity': song['popularity'],
                 'release_date': song['album']['release_date'],
+                'image':song['album']['images'][0]['url']
             })
 
         return songs
