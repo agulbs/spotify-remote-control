@@ -78,8 +78,18 @@ def index():
             controller = Controls(sp, device)
             break
 
+    s = sp.current_playback()
+    pprint(s)
+
     return render_template("index.html")
 
+@app.route("/current-playback", methods=["GET"])
+def current_playback():
+    search = Search(sp)
+    song = search.current_playback()
+    if song == 0:
+        return jsonify({'song': {}, 'status': "400"})
+    return jsonify({'song': song, 'status': "201"})
 
 @app.route("/devices", methods=["GET"])
 def devices():

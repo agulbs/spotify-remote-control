@@ -5,10 +5,17 @@ class Search:
     def __init__(self, controller):
         self.controller = controller
 
+    def current_playback(self):
+        result = self.controller.current_playback()
+        if result is not None:
+            return self.song_dict(result)
+        return 0
+        # song = self.song_dict(result)
+        # return song
+
     def song(self, song):
-        results = self.controller.search(q=song, limit=50) #, type='track')
+        results = self.controller.search(q=song, limit=50)
         songs = self.songs_dict(results)
-        pprint(songs)
 
         return songs
 
@@ -38,7 +45,6 @@ class Search:
         songs = []
 
         for song in result['tracks']['items']:
-
             songs.append({
                 'artist': song['album']['artists'][0]['name'],
                 'name': song['name'],
@@ -50,6 +56,17 @@ class Search:
             })
 
         return songs
+
+    def song_dict(self, result):
+        return {
+            'artist': result['item']['album']['artists'][0]['name'],
+            'name': result['item']['name'],
+            'uri': result['item']['uri'],
+            'duration': result['item']['duration_ms'],
+            'popularity': result['item']['popularity'],
+            'release_date': result['item']['album']['release_date'],
+            'image':result['item']['album']['images'][0]['url']
+        }
 
 
 

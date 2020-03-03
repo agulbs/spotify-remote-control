@@ -1,5 +1,6 @@
 var returnData;
 
+
 $('#iconified').on('keyup', function() {
     var input = $(this);
     if (input.val().length === 0) {
@@ -9,7 +10,23 @@ $('#iconified').on('keyup', function() {
     }
 });
 
+
 $(document).ready(() => {
+
+    var params = {
+        'url': '/current-playback',
+        'type': 'GET',
+        'data': {}
+    }
+
+    requestData(params).then((res) => {
+        var song = res['song']
+        setCurrSong(song['name'], song['image']);
+    }, (err) => {
+        console.log(err)
+    })
+
+
     $('#search').on('keypress', (e) => {
         if (e.which === 13) {
             params = {
@@ -45,7 +62,29 @@ $(document).ready(() => {
             })
         }
     })
+
+    $('#playPause').on('click', (e) => {
+        var value = e.target.classList[1].split('-')[1];
+        params = {
+            'url': '/music-controls',
+            'type': 'POST',
+            'data': {
+                'key': value
+            }
+        }
+
+        requestData(params).then((res) => {
+            if (value === "play")
+                e.target.classList.value = "fas fa-pause"
+            else
+                e.target.classList.value = "fas fa-play"
+        }, (err) => {
+            console.log(err)
+        })
+
+    })
 })
+
 
 function playSong(songUri, image, id) {
     params = {
@@ -63,37 +102,19 @@ function playSong(songUri, image, id) {
 
         $('#name' + id).css('color', 'green')
 
-        $('#currSongName')[0].innerText = $('#name' + id)[0].innerText;
-        $("#currSongImage").attr("src", image);
-
-
-        console.log('name' + id, 'artist' + id, image)
+        var songName = $('#name' + id)[0].innerText;
+        setCurrSong(songName, image)
     }, (err) => {
         alert('No Device Selected')
         return false;
     });
-
-
-
-
-
-
-
-
-
 }
 
-async function requestData(params) {
-    return await request(params);
-}
 
-function request(params) {
-    return $.ajax({
-        url: params['url'],
-        type: params['type'],
-        contentType: "application/json",
-        data: JSON.stringify(params['data'])
-    });
+function setCurrSong(songName, image) {
+    $('#currSongName')[0].innerText = songName
+    $("#currSongImage").attr("src", image);
+    $('#playPause')[0].classList.value = "fas fa-pause"
 }
 
 
@@ -114,4 +135,19 @@ function msConversion(millis) {
     } else {
         return min + ":" + sec;
     }
+}
+
+
+async function requestData(params) {
+    return await request(params);
+}
+
+
+function request(params) {
+    return $.ajax({
+        url: params['url'],
+        type: params['type'],
+        contentType: "application/json",
+        data: JSON.stringify(params['data'])
+    });
 }
