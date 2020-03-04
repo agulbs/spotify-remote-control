@@ -1,7 +1,9 @@
+var params;
+
 $(document).ready(() => {
 
     // Get current song queue
-    var params = {
+    params = {
         'url': '/current-playback',
         'type': 'GET',
         'data': {}
@@ -86,18 +88,69 @@ $(document).ready(() => {
 
     })
 
-    // hide/display search view
-    $('#searchIcon').on('click', (e) => {
-        $('#searchContent').css('display', '')
-        $('#libraryContent').css('display', 'none')
+    // // hide/display search view
+    // $('#searchIcon').on('click', (e) => {
+    //     $('#searchContent').css('display', '')
+    //     $('#libraryContent').css('display', 'none')
+    // })
+    //
+    // // hide/display library view
+    // $('#libraryIcon').on('click', (e) => {
+    //     $('#libraryContent').css('display', '')
+    //     $('#searchContent').css('display', 'none')
+    // })
+})
+
+
+function getDevices() {
+    params = {
+        'url': '/get-devices',
+        'type': 'GET',
+        'data': {}
+    }
+
+    requestData(params).then((res) => {
+        $('#deviceData').empty();
+        res['devices'].forEach((device) => {
+
+            $('#deviceData').append(
+                "<div class=\"row\" style=\"padding-top:5px;padding-bottom:15px;\" onClick=\"switchDevice(\'" + device.id + "\')\">" +
+                "<div class=\"col-3 d-flex justify-content-end\">Name:</div>" +
+                "<div class=\"col-9\">" + device.name + "</div>" +
+                "<div class=\"col-3 d-flex justify-content-end\">Type:</div>" +
+                "<div class=\"col-9\">" + device.type + "</div>" +
+                "<div class=\"col-3 d-flex justify-content-end\">Is Active:</div>" +
+                "<div class=\"col-9\" id=\"" + device.id + "\">" + device.is_active + "</div>" +
+                "</div>"
+            );
+        })
+    }, (err) => console.log(err))
+
+}
+
+function switchDevice(id) {
+    params = {
+        'url': '/switch-device',
+        'type': 'POST',
+        'data': {
+            'key': id
+        }
+    }
+
+    requestData(params).then((res) => {
+        var ch = $('#deviceData')[0].children;
+        for (var c of ch) {
+            c.children[5].innerText = 'False'
+        }
+
+        $('#' + id)[0].innerText = 'True';
+    }, (err) => {
+        console.log(err)
     })
 
-    // hide/display library view
-    $('#libraryIcon').on('click', (e) => {
-        $('#libraryContent').css('display', '')
-        $('#searchContent').css('display', 'none')
-    })
-})
+
+}
+
 
 function getPlaylists() {
 

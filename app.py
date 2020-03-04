@@ -20,7 +20,7 @@ sp = None
 controller = None
 songs = None
 devices = []
-
+search = None
 
 @app.route("/")
 def verify():
@@ -61,65 +61,98 @@ def index():
     ----------------------------------------------
 
     sp: spotify object
+    search: used to make calls to spotify api
     device: current active device
     devices: list of all devices
     controller: controls device & music state
     """
     global sp
+    global search
     global device
     global devices
     global controller
 
     sp = spotipy.Spotify(auth=session['toke'])
-
+    search = Search(sp)
     devices = [Devices(**device) for device in sp.devices()['devices']]
+
+    if len(devices) == 0:
+        return render_template("index.html")
+
     for device in devices:
         if device.is_active:
             controller = Controls(sp, device)
             break
 
-    s = sp.current_playback()
-    pprint(s)
+    if controller is None:
+        controller = Controls(sp, devices[0])
 
     return render_template("index.html")
 
 @app.route("/library")
 def library():
+    """
+    renders library view
+    """
     return render_template("library.html")
+
+@app.route("/devices")
+def devices():
+    return render_template("devices.html")
 
 
 @app.route("/load-playlist", methods=["POST"])
 def load_playlist():
+    """
+    retrieves songs for requsted playlist
+    -------------------------------------
+
+    songs: songs in requested playlist
+    """
     r = request.json['id']
-    search = Search(sp)
     songs = search.load_playlist(r)
     return jsonify({'songs':songs, 'status':"200"})
 
 
 @app.route("/playlists", methods=["GET"])
 def playlists():
-    search = Search(sp)
+    """
+    retrieves all playlists liked by user
+    -------------------------------------
+
+    playlists: all user liked playlists
+    """
     playlists = search.user_playlists()
     return jsonify({'playlists': playlists, 'status': "200"})
 
 
 @app.route("/liked-songs", methods=["GET"])
 def liked_songs():
-    search = Search(sp)
+    """
+    retrieves all songs liked by user
+    ---------------------------------
+
+    songs: all liked songs
+    """
     songs = search.liked_songs()
     return jsonify({'songs':songs, 'status':"200"})
 
 
 @app.route("/current-playback", methods=["GET"])
 def current_playback():
-    search = Search(sp)
+    """
+    retrieves current song being played
+    -----------------------------------
+
+    song: current song
+    """
     song = search.current_playback()
     if song == 0:
         return jsonify({'song': {}, 'status': "400"})
     return jsonify({'song': song, 'status': "201"})
 
-@app.route("/devices", methods=["GET"])
-def devices():
+@app.route("/get-devices", methods=["GET"])
+def get_devices():
     """
     get all available devices
     -------------------------
@@ -128,10 +161,12 @@ def devices():
     """
     global devices
 
+    devices = [Devices(**device) for device in sp.devices()['devices']]
     d = []
-
     for device in devices:
         d.append(device.to_dict())
+
+    pprint(d)
 
     return jsonify({'devices': d, 'status': "201"})
 
@@ -142,8 +177,17 @@ def switch_device():
     switches to new device based on device_id
     """
 
+    global controller
+
     r = request.json['key']
     controller.switch_device(r)
+
+    devices = [Devices(**device) for device in sp.devices()['devices']]
+    for device in devices:
+        if device.is_active:
+            controller = Controls(sp, device)
+            break
+
 
     return "201"
 
