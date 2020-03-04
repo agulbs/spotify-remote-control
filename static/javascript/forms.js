@@ -43,7 +43,7 @@ $(document).ready(() => {
 
                 res['songs'].forEach(song => {
                     $('#searchResultData').append(
-                        "<div class=\"row\" style=\"padding-top:5px;padding-bottom:15px;\" onClick=\"playSong(\'" + song.uri + "\', \'" + song.image + "\'," + cnt + ")\">" +
+                        "<div class=\"row\" style=\"padding-top:5px;padding-bottom:15px;\" onClick=\"playSong(\'" + song.uri + "\', \'" + song.image + "\'," + cnt + ", 'searchResultData')\">" +
                         "<div class=\"col-3\">" +
                         "<img src=\"" + song.image + "\" class=\"img-fluid\" alt=\"Responsive image\">" +
                         "</div>" +
@@ -100,7 +100,8 @@ $(document).ready(() => {
 })
 
 function getPlaylists() {
-    var params = {
+
+    params = {
         'url': '/playlists',
         'type': 'GET',
         'data': {}
@@ -110,7 +111,7 @@ function getPlaylists() {
         console.log(res);
         res['playlists'].forEach((playlist) => {
             $('#playlistData').append(
-                "<div class=\"row\" style=\"padding-top:5px;padding-bottom:15px;\">" +
+                "<div class=\"row\" style=\"padding-top:5px;padding-bottom:15px;\" onClick=\"playPlaylist( \'" + playlist.name + "\', \'" + playlist.id + "\')\">" +
                 "<div class=\"col-3\">" +
                 "<img src=\"" + playlist.image + "\" class=\"img-fluid\" alt=\"Responsive image\">" +
                 "</div>" +
@@ -128,9 +129,46 @@ function getPlaylists() {
     })
 }
 
+function playPlaylist(playlist, id) {
+    params = {
+        'url': '/load-playlist',
+        'type': 'POST',
+        'data': {
+            'id': id
+        }
+    }
+
+    requestData(params).then((res) => {
+        $('#playlistHeading')[0].innerText = playlist;
+        $('#playlistData').empty();
+        var cnt = 1;
+
+        res['songs'].forEach((song) => {
+            $('#playlistData').append(
+                "<div class=\"row\" style=\"padding-top:5px;padding-bottom:15px;\" onClick=\"playSong(\'" + song.uri + "\', \'" + song.image + "\'," + cnt + ", 'playlistData')\">" +
+                "<div class=\"col-3\">" +
+                "<img src=\"" + song.image + "\" class=\"img-fluid\" alt=\"Responsive image\">" +
+                "</div>" +
+                "<div class=\"col-9\">" +
+                "<div class=\"row\">" +
+                "<div id=\"name" + cnt + "\" class=\"col-12\">" + song.name + "</div>" +
+                "<div id=\"artist" + cnt + "\" class=\"col-12\">" + song.artist + "</div>" +
+                "<div class=\"col-12\">" + msConversion(song.duration) + "</div>" +
+                "</div>" +
+                "</div>" +
+                "</div>"
+            )
+
+            cnt++;
+        })
+    }, (err) => {
+        console.log(err)
+    })
+}
+
 
 // play chosen song & set in status bar
-function playSong(songUri, image, id) {
+function playSong(songUri, image, id, idField) {
     params = {
         'url': '/new-song',
         'type': 'POST',
@@ -141,7 +179,7 @@ function playSong(songUri, image, id) {
 
     requestData(params).then((res) => {
         // disable all selected songs
-        $('#searchResultData').children().each((idx, item) => {
+        $('#' + idField).children().each((idx, item) => {
             $('#name' + (idx + 1)).css('color', '#ededed')
         });
 

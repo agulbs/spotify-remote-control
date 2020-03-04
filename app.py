@@ -87,11 +87,27 @@ def index():
 def library():
     return render_template("library.html")
 
+
+@app.route("/load-playlist", methods=["POST"])
+def load_playlist():
+    r = request.json['id']
+    search = Search(sp)
+    songs = search.load_playlist(r)
+    return jsonify({'songs':songs, 'status':"200"})
+
+
 @app.route("/playlists", methods=["GET"])
 def playlists():
     search = Search(sp)
     playlists = search.user_playlists()
     return jsonify({'playlists': playlists, 'status': "200"})
+
+
+@app.route("/liked-songs", methods=["GET"])
+def liked_songs():
+    search = Search(sp)
+    songs = search.liked_songs()
+    return jsonify({'songs':songs, 'status':"200"})
 
 
 @app.route("/current-playback", methods=["GET"])
@@ -193,4 +209,4 @@ def music_controls():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run( debug=True)

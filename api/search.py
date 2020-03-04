@@ -22,14 +22,20 @@ class Search:
 
     def liked_songs(self):
         results = self.controller.current_user_saved_tracks()
-        liked_songs = self.liked_songs_dict(results)
-        pprint(liked_songs)
+        pprint(results)
+        liked_songs = self.playlist_songs_dict(results)
+        return liked_songs
 
     def user_playlists(self):
         results = self.controller.current_user_playlists()
         pprint(results)
         playlists = self.playlists_dict(results)
         return playlists
+
+    def load_playlist(self, id):
+        results = self.controller.playlist_tracks(id)
+        songs = self.playlist_songs_dict(results)
+        return songs
 
     def format_songs(self, result):
         songs = []
@@ -82,12 +88,14 @@ class Search:
                 'image': playlist['images'][0]['url'],
                 'tracks': playlist['href'],
                 'total': playlist['tracks']['total'],
-                'description': playlist['description']
+                'description': playlist['description'],
+                'uri':playlist['uri'],
+                'id': playlist['id']
             })
 
         return playlists
 
-    def liked_songs_dict(self, result):
+    def playlist_songs_dict(self, result):
         all_songs = []
         songs = result['items']
 
