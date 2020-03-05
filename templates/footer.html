@@ -1,14 +1,13 @@
 <div class="container-fluid footer">
-    <div class="row align-items-center" style="background-color:#3b3b3b;height:80px;color:#ededed;">
+    <div class="row align-items-center" style="background-color:#3b3b3b;height:80px;color:#ededed;" id="currSong">
         <div class="col-3">
             <img src="" id="currSongImage" class="img-fluid">
         </div>
         <div class="col-9">
             <span id="currSongName"></span>
             <div class="row" style="padding-top:5px;">
-                <div class="col-4"><i class="fas fa-volume-down"></i></div>
                 <div class="col-4"><i id="playPause" class="fas fa-play"></i></div>
-                <div class="col-4"><i class="fas fa-volume-up"></i></div>
+                <div class="col-8"><input type="range" class="custom-range" id="customRange1"></div>
             </div>
         </div>
     </div>

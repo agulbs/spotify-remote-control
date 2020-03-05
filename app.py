@@ -43,7 +43,8 @@ def api_callback():
     res = requests.post(auth_token_url, data={
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": "http://127.0.0.1:5000/callback",
+        # "redirect_uri": "http://127.0.0.1:5000/callback",
+        "redirect_uri": "http://192.168.1.4:5000/callback",
         "client_id": CLI_ID,
         "client_secret": CLI_SEC
     })
@@ -101,6 +102,18 @@ def devices():
     return render_template("devices.html")
 
 
+@app.route("/load-liked-songs", methods=["GET"])
+def liked_songs():
+    """
+    retrieves all songs liked by user
+    ---------------------------------
+
+    songs: all liked songs
+    """
+    songs = search.liked_songs()
+    return jsonify({'songs':songs, 'status':"200"})
+
+
 @app.route("/load-playlist", methods=["POST"])
 def load_playlist():
     """
@@ -124,18 +137,6 @@ def playlists():
     """
     playlists = search.user_playlists()
     return jsonify({'playlists': playlists, 'status': "200"})
-
-
-@app.route("/liked-songs", methods=["GET"])
-def liked_songs():
-    """
-    retrieves all songs liked by user
-    ---------------------------------
-
-    songs: all liked songs
-    """
-    songs = search.liked_songs()
-    return jsonify({'songs':songs, 'status':"200"})
 
 
 @app.route("/current-playback", methods=["GET"])
@@ -166,8 +167,6 @@ def get_devices():
     for device in devices:
         d.append(device.to_dict())
 
-    pprint(d)
-
     return jsonify({'devices': d, 'status': "201"})
 
 
@@ -187,7 +186,6 @@ def switch_device():
         if device.is_active:
             controller = Controls(sp, device)
             break
-
 
     return "201"
 
@@ -253,4 +251,5 @@ def music_controls():
 
 
 if __name__ == '__main__':
-    app.run( debug=True)
+    # app.run( debug=True)
+    app.run(host='0.0.0.0',port=5000, debug=True)

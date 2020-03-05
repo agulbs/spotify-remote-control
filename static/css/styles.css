@@ -18,3 +18,7 @@ body {
 .fontAwesome {
     font-family: Helvetica, 'FontAwesome', sans-serif;
 }
+
+a{
+    color: #ededed
+}

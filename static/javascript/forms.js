@@ -87,18 +87,6 @@ $(document).ready(() => {
         })
 
     })
-
-    // // hide/display search view
-    // $('#searchIcon').on('click', (e) => {
-    //     $('#searchContent').css('display', '')
-    //     $('#libraryContent').css('display', 'none')
-    // })
-    //
-    // // hide/display library view
-    // $('#libraryIcon').on('click', (e) => {
-    //     $('#libraryContent').css('display', '')
-    //     $('#searchContent').css('display', 'none')
-    // })
 })
 
 
@@ -152,6 +140,7 @@ function switchDevice(id) {
 }
 
 
+
 function getPlaylists() {
 
     params = {
@@ -176,6 +165,41 @@ function getPlaylists() {
                 "</div>" +
                 "</div>"
             )
+        })
+    }, (err) => {
+        console.log(err)
+    })
+}
+
+function getLikedSongs() {
+    params = {
+        'url': '/load-liked-songs',
+        'type': 'GET',
+        'data': {}
+    }
+
+    requestData(params).then((res) => {
+        $('#playlistHeading')[0].innerText = "Liked Songs";
+        $('#playlistData').empty();
+        var cnt = 1;
+
+        res['songs'].forEach((song) => {
+            $('#playlistData').append(
+                "<div class=\"row\" style=\"padding-top:5px;padding-bottom:15px;\" onClick=\"playSong(\'" + song.uri + "\', \'" + song.image + "\'," + cnt + ", 'playlistData')\">" +
+                "<div class=\"col-3\">" +
+                "<img src=\"" + song.image + "\" class=\"img-fluid\" alt=\"Responsive image\">" +
+                "</div>" +
+                "<div class=\"col-9\">" +
+                "<div class=\"row\">" +
+                "<div id=\"name" + cnt + "\" class=\"col-12\">" + song.name + "</div>" +
+                "<div id=\"artist" + cnt + "\" class=\"col-12\">" + song.artist + "</div>" +
+                "<div class=\"col-12\">" + msConversion(song.duration) + "</div>" +
+                "</div>" +
+                "</div>" +
+                "</div>"
+            )
+
+            cnt++;
         })
     }, (err) => {
         console.log(err)
@@ -252,9 +276,16 @@ function playSong(songUri, image, id, idField) {
 
 // set current song in status
 function setCurrSong(songName, image) {
-    $('#currSongName')[0].innerText = songName
-    $("#currSongImage").attr("src", image);
-    $('#playPause')[0].classList.value = "fas fa-pause"
+    console.log(songName)
+    if (typeof songName === 'undefined') {
+        $('#currSong').css('display', 'none')
+    } else {
+        $('#currSong').css('display', '')
+        $('#currSongName')[0].innerText = songName
+        $("#currSongImage").attr("src", image);
+        $('#playPause')[0].classList.value = "fas fa-pause"
+    }
+
 }
 
 
