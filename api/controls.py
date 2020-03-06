@@ -34,24 +34,7 @@ class Controls:
 
     def start_playback(self, uri):
         self.controller.start_playback(uris=uri)
-
-    def volume(self, flag):
-        vol = self.device.volume_percent
-
-        if flag:
-            vol += 5
-            if vol > 100:
-                vol = 100
-        else:
-            vol -= 5
-            if vol < 0:
-                vol = 0
-
-        self.device.volume_percent = vol
-        try:
-            self.controller.volume(vol, self.device.id)
-        except:
-            print("err")
+        
 
     def user_playlists(self, user):
         items = {}

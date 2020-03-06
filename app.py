@@ -241,12 +241,6 @@ def music_controls():
     if r == "pause":
         controller.pause()
 
-    if r == "volumeDown":
-        controller.volume(False)
-
-    if r == "volumeUp":
-        controller.volume(True)
-
     return "200"
 
 
